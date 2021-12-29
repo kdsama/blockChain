@@ -1,0 +1,11 @@
+Multiple Chain Validation 
+Miners will have their own version of chain 
+If a miner wants to add a block to chain, to update the overall system, It has to be submitted to all the chains 
+We need to  make sure new block is valid 
+The one submitted with more blocks is usually the on that is accepted as a priority 
+This may ? help with the issue of forks where multiple miners are submitting same no of blocks . So half the receivers will have different blocks at nth position 
+If third person extends first person block , now third persons version will be accepted for all the chains. Also, second person's block will be added on next. 
+
+
+
+Hash validation :- Re-Hash is done, if after re-hashing the values dont match , it means that data has been tampered. 
