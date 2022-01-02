@@ -4,6 +4,7 @@ import (
 	"blockchain/blockchain/blocks"
 	"blockchain/utils"
 	"errors"
+	"fmt"
 	"reflect"
 )
 
@@ -14,7 +15,7 @@ var (
 
 // Blockchain struct comprising of blocks
 type Blockchain struct {
-	chain []*blocks.Block
+	Chain []*blocks.Block `json:"chain"`
 }
 
 // NewBlockChain Create a New Block
@@ -23,27 +24,31 @@ func NewBlockChain() *Blockchain {
 	chain := []*blocks.Block{genesisBlock}
 	return &Blockchain{chain}
 }
-func (bl *Blockchain) addBlock(data string) *blocks.Block {
-	lastBlock := bl.chain[len(bl.chain)-1]
+
+//AddBlock adds a newblock to the blockchain
+func (bl *Blockchain) AddBlock(data string) *blocks.Block {
+	lastBlock := bl.Chain[len(bl.Chain)-1]
 	newBlock := blocks.Mineblock(lastBlock, data)
-	bl.chain = append(bl.chain, newBlock)
+	bl.Chain = append(bl.Chain, newBlock)
 	return newBlock
 }
 
 func (bl *Blockchain) isValidChain(ch []*blocks.Block) bool {
 	ok := reflect.DeepEqual(ch[0], blocks.GenesisBlock())
+	fmt.Println(ch[0], blocks.GenesisBlock())
 	if !ok {
-
+		fmt.Println("RETURNING FROM HERE ?????")
 		return false
 	}
-	for i := 1; i < len(bl.chain); i++ {
+	for i := 1; i < len(bl.Chain); i++ {
 
 		currentBlock := ch[i]
 		lastBlock := ch[i-1]
-		ObjectBlock := bl.chain[i]
-
-		if currentBlock.LastHash != lastBlock.Hash || currentBlock.Hash != utils.NewSHA256(ObjectBlock.Timestamp, ObjectBlock.LastHash, ObjectBlock.Data) {
-
+		ObjectBlock := bl.Chain[i]
+		fmt.Println(currentBlock, ObjectBlock)
+		if currentBlock.LastHash != lastBlock.Hash || currentBlock.Hash != utils.NewSHA256(ObjectBlock.Timestamp, ObjectBlock.LastHash, ObjectBlock.Data, ObjectBlock.Nonce, ObjectBlock.Difficulty) {
+			fmt.Println(currentBlock, ObjectBlock)
+			fmt.Println(currentBlock.Hash, utils.NewSHA256(ObjectBlock.Timestamp, ObjectBlock.LastHash, ObjectBlock.Data, ObjectBlock.Nonce, ObjectBlock.Difficulty))
 			return false
 		}
 
@@ -51,9 +56,15 @@ func (bl *Blockchain) isValidChain(ch []*blocks.Block) bool {
 	return true
 }
 
-func (bl *Blockchain) replaceChain(newChain []*blocks.Block) (*Blockchain, error) {
+// Get returns the whole chain
+func (bl *Blockchain) Get() []*blocks.Block {
+	return bl.Chain
+}
 
-	if len(newChain) <= len(bl.chain) {
+// ReplaceChain :: Replace chain with a new chain if constraints meet (isValid, bigger chain)
+func (bl *Blockchain) ReplaceChain(newChain []*blocks.Block) (*Blockchain, error) {
+
+	if len(newChain) <= len(bl.Chain) {
 
 		return &Blockchain{}, errNotLongEnough
 	} else {
@@ -62,7 +73,7 @@ func (bl *Blockchain) replaceChain(newChain []*blocks.Block) (*Blockchain, error
 			return &Blockchain{}, errInvalidChain
 		} else {
 
-			bl.chain = newChain
+			bl.Chain = newChain
 			return bl, nil
 		}
 	}

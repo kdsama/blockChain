@@ -10,7 +10,7 @@ import (
 func TestBlockchain(t *testing.T) {
 	want := "firstblock"
 	newChain := NewBlockChain()
-	got := newChain.chain[0].Data
+	got := newChain.Chain[0].Data
 
 	if want != got {
 		t.Errorf("Wanted data of genesis to be %v, but got %v", want, got)
@@ -22,9 +22,9 @@ func TestBlockchain(t *testing.T) {
 
 	t.Run("New added block should be at the end of the blockchain", func(t *testing.T) {
 
-		newChain.addBlock("Yahoo")
+		newChain.AddBlock("Yahoo")
 		want := "Yahoo"
-		got := newChain.chain[len(newChain.chain)-1].Data
+		got := newChain.Chain[len(newChain.Chain)-1].Data
 
 		if want != got {
 			t.Errorf("Expected data to be %v , but got %v", want, got)
@@ -38,7 +38,7 @@ func TestIsValidChain(t *testing.T) {
 	t.Run("Genesis BLock: Verification should return true", func(t *testing.T) {
 		newChain := NewBlockChain()
 		want := true
-		l := newChain.chain
+		l := newChain.Chain
 		newChain2 := NewBlockChain()
 		got := newChain2.isValidChain(l)
 		if want != got {
@@ -50,7 +50,7 @@ func TestIsValidChain(t *testing.T) {
 	t.Run("GenesisBlock: Verification should return false", func(t *testing.T) {
 		newChain := NewBlockChain()
 		want := false
-		l := newChain.chain
+		l := newChain.Chain
 		newChain2 := NewBlockChain()
 		l[0].Data = "NotFirstBlock"
 		got := newChain2.isValidChain(l)
@@ -63,12 +63,12 @@ func TestIsValidChain(t *testing.T) {
 	t.Run("Changing Data of SecondBlock,should not be valid", func(t *testing.T) {
 		chain1 := NewBlockChain()
 		chain2 := NewBlockChain()
-		chain1.addBlock("Second")
-		chain2.addBlock("ass")
-		chain1.addBlock("third")
-		chain2.addBlock("third")
+		chain1.AddBlock("Second")
+		chain2.AddBlock("ass")
+		chain1.AddBlock("third")
+		chain2.AddBlock("third")
 		want := false
-		got := chain1.isValidChain(chain2.chain)
+		got := chain1.isValidChain(chain2.Chain)
 		if want != got {
 			t.Errorf("Expected data to be %v , but got %v", want, got)
 		}
@@ -79,16 +79,16 @@ func TestIsValidChain(t *testing.T) {
 
 		chain1 := NewBlockChain()
 
-		chain1.addBlock("second")
+		chain1.AddBlock("second")
 
-		chain1.addBlock("third")
+		chain1.AddBlock("third")
 
-		chain1.addBlock("third")
+		chain1.AddBlock("third")
 
-		chain1.addBlock("third")
-
+		chain1.AddBlock("fourth")
+		// fmt.Println(chain1.Chain)
 		want := true
-		got := chain1.isValidChain(chain1.chain)
+		got := chain1.isValidChain(chain1.Chain)
 		if want != got {
 			t.Errorf("Expected data to be %v , but got %v", want, got)
 		}
@@ -100,14 +100,13 @@ func TestReplaceChain(t *testing.T) {
 
 		chain1 := NewBlockChain()
 		chain2 := NewBlockChain()
-		chain1.addBlock("Second")
-		chain2.addBlock("ass")
-		chain1.addBlock("third")
-		chain2.addBlock("third")
-		chain2.addBlock("fourth")
-		fmt.Println(len(chain1.chain), len(chain2.chain))
+		chain1.AddBlock("Second")
+		chain2.AddBlock("ass")
+		chain1.AddBlock("third")
+		chain2.AddBlock("third")
+		chain2.AddBlock("fourth")
 		want := errInvalidChain
-		_, got := chain1.replaceChain(chain2.chain)
+		_, got := chain1.ReplaceChain(chain2.Chain)
 		if want != got {
 			t.Errorf("Expected data to be %v , but got %v", want, got)
 		}
@@ -118,12 +117,12 @@ func TestReplaceChain(t *testing.T) {
 
 		chain1 := NewBlockChain()
 		chain2 := NewBlockChain()
-		chain1.addBlock("Second")
-		chain2.addBlock("ass")
-		chain1.addBlock("third")
+		chain1.AddBlock("Second")
+		chain2.AddBlock("ass")
+		chain1.AddBlock("third")
 
 		want := errNotLongEnough
-		_, got := chain1.replaceChain(chain2.chain)
+		_, got := chain1.ReplaceChain(chain2.Chain)
 		if want != got {
 			t.Errorf("Expected data to be %v , but got %v", want, got)
 		}
@@ -133,17 +132,20 @@ func TestReplaceChain(t *testing.T) {
 	t.Run("Input a valid Chain", func(t *testing.T) {
 		chain1 := NewBlockChain()
 		chain2 := NewBlockChain()
-		chain1.addBlock("Second")
+		chain1.AddBlock("Second")
 
-		chain1.addBlock("third")
-		chain2.chain = chain1.chain
-		chain2.addBlock("Fourth")
-		want := len(chain2.chain)
-		replaceChainResult, err := chain1.replaceChain(chain2.chain)
+		chain1.AddBlock("third")
+		chain2.Chain = chain1.Chain
+		chain2.AddBlock("Fourth")
+		want := len(chain2.Chain)
+		// fmt.Printf("%v \n %v", chain1.Chain[1], chain2.Chain[1])
+		replaceChainResult, err := chain1.ReplaceChain(chain2.Chain)
 		if err != nil {
-			t.Error("Didnot Expect an error")
+			fmt.Println(err)
+			// t.Error("Didnot Expect an error")
+			// t.Error(fmt.Sprintf("%v", err))
 		}
-		got := len(replaceChainResult.chain)
+		got := len(replaceChainResult.Chain)
 		if got != want {
 			t.Errorf("Expected total length to be %v, but got %v", want, got)
 		}

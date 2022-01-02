@@ -1,0 +1,50 @@
+Proof of Work System 
+
+A system that requires miners to do computational work to add blocks
+Any peer can replace the blockchain (long enough and valid hash data)
+The proof of work makes it expensive to generate corrupt chains for dishonest miners
+Manageable to submit one block, unproductive to generate an entire chain
+Bitcoin uses it. It uses Hashcash. 
+Hashcash was a proof of work system used to prevent email spamming, DOS attacks
+
+ At a given time , the blockchain will have a level of difficulty. 
+ So if a miner wants to add a block, they would need to create a
+  hash in correspondance to the difficulty of the blockchain at the moment
+
+
+  difficulty : 6 
+
+  Hash = 000000haxi2910jasdflk
+  Miners would need to find a hash that has same number of leading zeroes as the difficulty level
+  As difficulty rises , finding a hash with same number of leading zeroes becomes difficult exponentially
+  Miner will generate hash based on the data of the blockchain. But wont the hash be the same throughout ? 
+  A NONCE is used as a variable parameter. The miners adjust it in the quest to find hash 
+  with same number of leading zeroes
+
+  Nonce can only be used once to generate hash of a block 
+  Once found , this nonce value will be saved to the block 
+  Once the other miners know this nonce value, they can verify validity of the 
+  solution and add the block to their own blockchain
+  This way frequency of adding new blocks can be controlled
+  a bitcoin sets the rate to add a new block around every 10 minutes 
+
+
+  51 % Attack ==> happens on pow system 
+  what if a dishonest miner has more than 51% of the networks power ??
+  They can replace current blockchain with one that will favor them 
+  pow makes it so  difficult that its useless 
+  in 2018 , a 51% attack for bitcoind would cost around $6 billion
+
+
+
+Dynamic Block difficulty
+Block difficulty should increase as more and more miners are added 
+we add difficulty attribute to each block 
+Also we add Mine rate :- rate at which we want a block to be mined 
+
+
+If concurrent blocks had a time difference of x seconds , 
+which is less than the mine rate, It means its been too easy, 
+and hence we will increase the rate of mining 
+
+If its too slow, we will decrease the block mine rate 

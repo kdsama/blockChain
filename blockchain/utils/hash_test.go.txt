@@ -1,0 +1,23 @@
+package utils
+
+import (
+	"fmt"
+	"testing"
+)
+
+func TestSHA256(t *testing.T) {
+	// want := "0"
+	var got string
+	var nonce int64
+	nonce = 0
+	for i := 0; i < 10; i++ {
+		got = NewSHA256(222, "asdasd", "asdasda", nonce)
+		nonce += 1
+		fmt.Println(nonce)
+		if got[0:1] == "0" {
+			break
+		}
+	}
+	t.Error("0 Not found")
+
+}
