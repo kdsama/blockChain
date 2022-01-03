@@ -1,10 +1,10 @@
 package blocks
 
 import (
+	"blockchain/utils"
 	"fmt"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestBlock(t *testing.T) {
@@ -42,7 +42,7 @@ func TestBlock(t *testing.T) {
 	t.Run("Adjust Difficulty Mechanism, should return a smaller difficulty level", func(t *testing.T) {
 		bl := GenesisBlock()
 		bl1 := Mineblock(bl, "NewData")
-		timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+		timestamp := utils.MakeTimestamp()
 		got := bl1.adjustDifficulty(int64(timestamp) + 36000)
 		want := bl1.Difficulty - 1
 		if got != want {
@@ -52,7 +52,7 @@ func TestBlock(t *testing.T) {
 	t.Run("Adjust Difficulty Mechanism, should return a bigger difficulty level", func(t *testing.T) {
 		bl := GenesisBlock()
 		bl1 := Mineblock(bl, "NewData")
-		timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+		timestamp := utils.MakeTimestamp()
 		got := bl1.adjustDifficulty(int64(timestamp) + 1)
 		want := bl1.Difficulty + 1
 		if got != want {

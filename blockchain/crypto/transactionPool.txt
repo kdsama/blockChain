@@ -1,0 +1,7 @@
+Transaction Pool 
+
+
+An object that contains all new Transactions submitted by individuals
+User will submit   Transactions to the pool . Initially they would be unconfirmed
+Why ??? Not officially included in the blockchain 
+Miners take a bunch of transactions from the pool and mine new blocks 

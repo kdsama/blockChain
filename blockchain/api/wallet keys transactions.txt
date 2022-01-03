@@ -1,0 +1,28 @@
+What is  a wallet 
+
+wallets store the balance of an individual 
+they store an individual keys 
+1. Private key : used to generate unique signatures.
+ For every exchange of cryptocurrency, the person would have to sign it 
+
+2, Public key
+    it is used to verify signatures . 
+
+
+Public Address :- identical to public key. Address to send currencies 
+
+
+Transactions : info behin moving cryptocurrency. 
+has two components 
+1. Input : timestamp, balance, signature , sender's public key 
+2. Output : Amount to be sent, Address : to be sent Address
+3. Output 2 : new blanace after sending data , and their address (as in input )
+
+Digital Signatures. 
+To record a transaction, stamp of unique signature is required. 
+Each signature has a private and public key. 
+user creates hash value from transaction data and  private key. Which is the signature 
+Public key is used to verify the signature. Decrypts signature and gets data . 
+If data is not same, This means invalid transaction : 
+1. original data was tampered with after it was signed 
+2. Signature is created using private key that does not corresponds to the public key 

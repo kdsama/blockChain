@@ -15,8 +15,8 @@ type postBlockRequest struct {
 	Data string `json:"data"`
 }
 
-//NewHandler returns handler for blockchain, all the requests will be received here
-func NewHandler(blockchain *blockchain.Blockchain, p2p *P2pServer) *BlockChainHandler {
+//NewBlockChainHandler returns handler for blockchain, all the requests will be received here
+func NewBlockChainHandler(blockchain *blockchain.Blockchain, p2p *P2pServer) *BlockChainHandler {
 	return &BlockChainHandler{blockchain, p2p}
 }
 

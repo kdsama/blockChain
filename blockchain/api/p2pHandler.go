@@ -3,6 +3,7 @@ package api
 import (
 	"blockchain/blockchain"
 	"blockchain/blockchain/blocks"
+	"blockchain/crypto"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -23,16 +24,27 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+var (
+	MESSAGEBLOCK    = "blockchain"
+	MESSAGETRANSACT = "transaction"
+)
+
+type P2pMessageStruct struct {
+	Data    *json.RawMessage
+	Message string
+}
+
 //P2pServer for p2p websocket connections
 type P2pServer struct {
 	service *blockchain.Blockchain
+	tp      *crypto.TransactionPool
 	sockets []*websocket.Conn
 }
 
 // NewP2pServer returns P2pServer Struct and also tries to connect to all the peer networks that are present
-func NewP2pServer(bl *blockchain.Blockchain) *P2pServer {
+func NewP2pServer(bl *blockchain.Blockchain, tp *crypto.TransactionPool) *P2pServer {
 	fmt.Println("Listening already started, connect to Peers")
-	toReturn := &P2pServer{bl, []*websocket.Conn{}}
+	toReturn := &P2pServer{bl, tp, []*websocket.Conn{}}
 	go toReturn.connectToPeer()
 	return toReturn
 }
@@ -62,7 +74,9 @@ func (p2p *P2pServer) peer(ad string) {
 	defer c.Close()
 
 	done := make(chan struct{})
-	c.WriteJSON(p2p.service.Chain)
+
+	writeToSocket(c, p2p.service.Chain)
+	// c.WriteJSON(p2p.service.Chain)
 	go func() {
 
 		for {
@@ -147,24 +161,66 @@ func (p2p *P2pServer) messageHandler(conn *websocket.Conn) {
 			return
 		}
 		// print out that message for clarity
-		var d []*blocks.Block
+		fmt.Println(string(p))
+		var d P2pMessageStruct
 		if err := json.Unmarshal(p, &d); err != nil {
 			panic(err)
 		}
 
-		x, v := p2p.service.ReplaceChain(d)
-		fmt.Println(x, v)
+		switch d.Message {
+		case MESSAGEBLOCK:
+			var blocks []*blocks.Block
+			if err := json.Unmarshal(*d.Data, &blocks); err != nil {
+				panic(err)
+			}
+			x, v := p2p.service.ReplaceChain(blocks)
+			fmt.Println(x, v)
+		case MESSAGETRANSACT:
+			// fmt.Println("WOAT?????????????")
+			var transaction crypto.Transaction
 
+			if err := json.Unmarshal([]byte(*d.Data), &transaction); err != nil {
+				fmt.Println(d)
+				panic(err)
+			}
+			// fmt.Println("ARE WE COMING HERE OR NOT ????")
+			// fmt.Println(transaction)
+			p2p.tp.UpdateOrAddTransaction(&transaction)
+
+		}
 	}
 }
 
 //Syncing all the chains
 func (p2p *P2pServer) syncChain() {
+	toSend := ConvertStructToRawMessage(p2p.service.Chain)
 	for i := range p2p.sockets {
-		p2p.sockets[i].WriteJSON(p2p.service.Chain)
+		p2p.sockets[i].WriteJSON(P2pMessageStruct{toSend, MESSAGEBLOCK})
 	}
 }
 
-func writeToSocket(socket *websocket.Conn, chain []*blocks.Block) {
-	socket.WriteJSON(chain)
+func (p2p *P2pServer) broadcastTransaction(t *crypto.Transaction) {
+	toSend := ConvertStructToRawMessage(t)
+	for i := range p2p.sockets {
+
+		p2p.sockets[i].WriteJSON(P2pMessageStruct{toSend, MESSAGETRANSACT})
+	}
+}
+
+func writeToSocket(socket *websocket.Conn, chain interface{}) {
+	toSend := ConvertStructToRawMessage(chain)
+	socket.WriteJSON(P2pMessageStruct{toSend, MESSAGEBLOCK})
+}
+
+func ConvertStructToRawMessage(data interface{}) *json.RawMessage {
+	// var rawJSONSlice []json.RawMessage
+	myIn, err := json.Marshal(data)
+	if err != nil {
+		// catch err
+	}
+
+	myInRaw := json.RawMessage(myIn)
+
+	// rawJSONSlice = append(rawJSONSlice, myInRaw)
+	return &myInRaw
 }

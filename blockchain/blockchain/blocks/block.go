@@ -3,7 +3,6 @@ package blocks
 import (
 	"blockchain/utils"
 	"strings"
-	"time"
 )
 
 type Block struct {
@@ -28,7 +27,7 @@ func NewBlock(timestamp int64, lastHash string, hash string, data string, nonce 
 // Hardcoded values in block
 // first real block will have lastHash of Genesis Block
 func GenesisBlock() *Block {
-	// timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	// timestamp := utils.MakeTimestamp()
 	return NewBlock(123456, "check123", "BlockTry2", "firstblock", 1, int64(DIFFICULTY))
 }
 
@@ -45,7 +44,7 @@ func Mineblock(b *Block, data string) *Block {
 	difficulty := b.Difficulty
 	for {
 		nonce++
-		timestamp = time.Now().UnixNano() / int64(time.Millisecond)
+		timestamp = utils.MakeTimestamp()
 		// fmt.Println("NONCEIS", nonce)
 
 		// Nonce is being used here. this changing value is here to generate a hash which has number of leading zeroes equal to the difficulty
