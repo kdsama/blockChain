@@ -4,6 +4,8 @@ import (
 	"blockchain/api"
 	"blockchain/blockchain"
 	"blockchain/crypto"
+	"blockchain/miner"
+	"blockchain/ws"
 	"log"
 	"net/http"
 	"os"
@@ -23,14 +25,16 @@ func main() {
 	// bl.AddBlock("Pagla")
 	tp := crypto.NewTransactionPool([]crypto.Transaction{})
 	wallet := crypto.NewWallet()
-	wsHandler := api.NewP2pServer(bl, tp)
+	wsHandler := ws.NewP2pServer(bl, tp)
 	handler := api.NewBlockChainHandler(bl, wsHandler)
-	cHandler := api.NewCryptoHandler(wallet, tp, wsHandler)
-
+	cHandler := api.NewCryptoHandler(wallet, tp, wsHandler, bl)
+	mine := miner.NewMiner(bl, tp, wallet, wsHandler)
+	mHandler := api.NewMinerHandler(mine)
 	http.HandleFunc("/blocks", handler.Blocks)
 	http.HandleFunc("/ws", wsHandler.Listen)
 	http.HandleFunc("/transactions", cHandler.Transactions)
 	http.HandleFunc("/transact", cHandler.Transactions)
 	http.HandleFunc("/public-key", cHandler.PublicKey)
+	http.HandleFunc("/mine-transactions", mHandler.Mine)
 	log.Fatal(http.ListenAndServe(os.Args[1], nil))
 }

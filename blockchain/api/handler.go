@@ -2,6 +2,7 @@ package api
 
 import (
 	"blockchain/blockchain"
+	"blockchain/ws"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,14 +10,14 @@ import (
 
 type BlockChainHandler struct {
 	service *blockchain.Blockchain
-	p2p     *P2pServer
+	p2p     *ws.P2pServer
 }
 type postBlockRequest struct {
 	Data string `json:"data"`
 }
 
 //NewBlockChainHandler returns handler for blockchain, all the requests will be received here
-func NewBlockChainHandler(blockchain *blockchain.Blockchain, p2p *P2pServer) *BlockChainHandler {
+func NewBlockChainHandler(blockchain *blockchain.Blockchain, p2p *ws.P2pServer) *BlockChainHandler {
 	return &BlockChainHandler{blockchain, p2p}
 }
 
@@ -59,6 +60,6 @@ func (bch *BlockChainHandler) postBlocks(w http.ResponseWriter, req *http.Reques
 	w.Write([]byte(fmt.Sprintln("Block was added successfully")))
 	fmt.Printf("%d", len(bch.service.Get()))
 	fmt.Printf("We need to sync All Chains")
-	bch.p2p.syncChain()
+	bch.p2p.SyncChain()
 
 }

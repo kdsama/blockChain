@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
-	"fmt"
 	"log"
 	"math/big"
 )
@@ -45,17 +44,18 @@ func NewTransaction(sendersWallet *Wallet, recipient string, amount int64) (*Tra
 	var outputs []Output
 	outputs = append(outputs, Output{sendersWallet.balance - amount, sendersWallet.publicKey})
 	outputs = append(outputs, Output{amount, recipient})
+	return TransactionWithOutputs(sendersWallet, outputs, id)
 
-	toReturn := &Transaction{id, Input{}, outputs}
-	toReturn.SignTransaction(sendersWallet)
-	return toReturn, nil
 }
 
 //SignTransaction signs transaction and insert value for the input field of transaction
 func (t *Transaction) SignTransaction(w *Wallet) {
 	data := utils.NewSHA256ForByteData(t.StructToByteOutput())
+
 	sig, r, s := utils.SignOutput(w.KeyPair, data)
+
 	toAddInput := Input{utils.MakeTimestamp(), w.balance, w.publicKey, sig, r, s}
+
 	t.Input = toAddInput
 
 }
@@ -82,7 +82,7 @@ func (t *Transaction) updateTransaction(sendersWallet *Wallet, recipient string,
 	for i := range t.Outputs {
 		if t.Outputs[i].Address == sendersWallet.publicKey {
 			senderOutput = i
-			fmt.Println("This is the main one")
+
 			break
 		}
 	}
@@ -93,10 +93,27 @@ func (t *Transaction) updateTransaction(sendersWallet *Wallet, recipient string,
 	t.Outputs[senderOutput].Amount = t.Outputs[senderOutput].Amount - amount
 
 	t.Outputs = append(t.Outputs, Output{amount, recipient})
+
 	// Update the value of the wallet
 	// sendersWallet.balance = t.Outputs[senderOutput].Amount
 	// fmt.Println(sendersWallet)
 	t.SignTransaction(sendersWallet)
 	// As the amount is different now , the signature should not be valid anymore. Thats why we need to generate a new input object
 	return nil
+}
+
+func TransactionWithOutputs(sendersWallet *Wallet, outputs []Output, id string) (*Transaction, error) {
+	toReturn := &Transaction{id, Input{}, outputs}
+	// fmt.Println("WHAT ABOUD DOS ???", sendersWallet)
+	toReturn.SignTransaction(sendersWallet)
+	return toReturn, nil
+}
+
+//blockchain wallet is a special wallet . why ? it generate signatures to confirm and authenticate transactions.
+// miners shouldnt be signing the rewards for miner themselves
+//RewardTransaction
+func RewardTransaction(m *Wallet, bW *Wallet) (*Transaction, error) {
+	id := utils.GenerateUUID()
+	// fmt.Println("REWARD TRANSACTION MAYBE ???", m)
+	return TransactionWithOutputs(bW, []Output{{Amount: int64(20), Address: m.publicKey}}, id)
 }

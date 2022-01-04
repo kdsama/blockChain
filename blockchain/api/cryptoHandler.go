@@ -1,7 +1,9 @@
 package api
 
 import (
+	"blockchain/blockchain"
 	"blockchain/crypto"
+	"blockchain/ws"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,7 +12,8 @@ import (
 type CryptoHandler struct {
 	w   *crypto.Wallet
 	tp  *crypto.TransactionPool
-	p2p *P2pServer
+	p2p *ws.P2pServer
+	bl  *blockchain.Blockchain
 }
 
 type transactRequest struct {
@@ -18,8 +21,8 @@ type transactRequest struct {
 	Amount    int
 }
 
-func NewCryptoHandler(w *crypto.Wallet, tp *crypto.TransactionPool, p2p *P2pServer) *CryptoHandler {
-	return &CryptoHandler{w, tp, p2p}
+func NewCryptoHandler(w *crypto.Wallet, tp *crypto.TransactionPool, p2p *ws.P2pServer, bl *blockchain.Blockchain) *CryptoHandler {
+	return &CryptoHandler{w, tp, p2p, bl}
 }
 func (ch *CryptoHandler) Transactions(w http.ResponseWriter, req *http.Request) {
 
@@ -86,12 +89,12 @@ func (ch *CryptoHandler) postTransactions(w http.ResponseWriter, req *http.Reque
 
 	}
 	// fmt.Println(t)
-	transaction, err := ch.w.CreateTransaction(t.Recipient, int64(t.Amount), ch.tp)
+	transaction, err := ch.w.CreateTransaction(t.Recipient, int64(t.Amount), ch.tp, ch.bl)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 	}
-	ch.p2p.broadcastTransaction(transaction)
+	ch.p2p.BroadcastTransaction(transaction)
 	// bch.service.AddBlock(t.Data)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(fmt.Sprintln("Transaction was done successfully")))

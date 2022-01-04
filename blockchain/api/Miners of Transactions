@@ -1,0 +1,5 @@
+Miners of Transactions
+miner take transaction from transactionPool and store them as data in blokchain
+Miner will give money to miners for the computational work they do . 
+WHen transactions go from pool to blockchain,  also the state goes from 
+unconfirmed in the pool to confirmed in the chain

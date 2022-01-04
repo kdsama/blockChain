@@ -45,7 +45,9 @@ func GenerateUUID() string {
 
 func SignOutput(pkey string, data []byte) (string, *big.Int, *big.Int) {
 	// byteInput := StructToByte(data)
+
 	r, s, serr := ecdsa.Sign(rand.Reader, DecodeECDSAPrivateKey(pkey), data)
+
 	if serr != nil {
 		fmt.Println(serr)
 		os.Exit(1)

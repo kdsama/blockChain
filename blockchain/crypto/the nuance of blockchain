@@ -1,0 +1,6 @@
+The Nuance Of Wallet Balance
+
+balance = all outputs that belong to a user
+Update the balance at least before each transaction
+all outputs since a user's most recent transaction
+ The most recent Amount in output is the true balance of the user

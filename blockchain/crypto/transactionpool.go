@@ -1,5 +1,14 @@
 package crypto
 
+import (
+	"errors"
+)
+
+var (
+	errMalformedTransaction        = errors.New("Found Malformed Transaction")
+	errInvalidTransactionSignature = errors.New("Invalid Transaction Signature")
+)
+
 type TransactionPool struct {
 	Transactions []Transaction `json:"transactions"`
 }
@@ -34,6 +43,33 @@ func (tp *TransactionPool) ExistingTransaction(publicKey string) (*Transaction, 
 	return &Transaction{}, nil
 }
 
-func (tp *TransactionPool) GetTransactions() *[]Transaction {
-	return &tp.Transactions
+func (tp *TransactionPool) GetTransactions() []Transaction {
+	return tp.Transactions
+}
+
+func (tp *TransactionPool) ValidTransactions() []Transaction {
+	// Total output amount matches balance in input
+	// Verify signature of every transaction to confirm data is not corrupted
+	validTr := []Transaction{}
+	for index := range tp.Transactions {
+		inputTotal := tp.Transactions[index].Input.Balance
+		OutputTotal := int64(0)
+		for indexOutput := range tp.Transactions[index].Outputs {
+			OutputTotal += tp.Transactions[index].Outputs[indexOutput].Amount
+		}
+
+		if inputTotal != OutputTotal {
+			continue
+		}
+		if !tp.Transactions[index].VerifyTransaction() {
+			continue
+		}
+
+		validTr = append(validTr, tp.Transactions[index])
+
+	}
+	return validTr
+}
+func (tp *TransactionPool) Clear() {
+	tp.Transactions = []Transaction{}
 }

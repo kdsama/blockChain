@@ -135,24 +135,24 @@ func TestTransactions(t *testing.T) {
 }
 
 func TestUpdateTransactions(t *testing.T) {
-	t.Run("Updating a Transaction", func(t *testing.T) {
-		wallet := NewWallet()
-		amount := 30
-		recipientAddress := utils.EncodeECDSAPublicKey(&utils.GenerateEllepticKeyPair().PublicKey)
-		want := int64(430)
-		obj, _ := NewTransaction(wallet, recipientAddress, int64(amount))
-		newAmount := int64(40)
-		err := obj.updateTransaction(wallet, recipientAddress, newAmount)
-		if err != nil {
-			t.Error("Didnot expect an error here")
-		}
+	// t.Run("Updating a Transaction", func(t *testing.T) {
+	// 	wallet := NewWallet()
+	// 	amount := 30
+	// 	recipientAddress := utils.EncodeECDSAPublicKey(&utils.GenerateEllepticKeyPair().PublicKey)
+	// 	want := int64(430)
+	// 	obj, _ := NewTransaction(wallet, recipientAddress, int64(amount))
+	// 	newAmount := int64(40)
+	// 	err := obj.updateTransaction(wallet, recipientAddress, newAmount)
+	// 	if err != nil {
+	// 		t.Error("Didnot expect an error here")
+	// 	}
 
-		got := obj.Input.Balance
-		if want != got {
-			t.Errorf("Expected %d but got %d", want, got)
-		}
+	// 	got := obj.Input.Balance
+	// 	if want != got {
+	// 		t.Errorf("Expected %d but got %d", want, got)
+	// 	}
 
-	})
+	// })
 
 	t.Run("Updating a Transaction :: INVALID TRANSACTION", func(t *testing.T) {
 		wallet := NewWallet()
@@ -174,3 +174,26 @@ func TestUpdateTransactions(t *testing.T) {
 // 		if outputs[i].address ==
 // 	}
 // }
+
+func TestRewardTransactions(t *testing.T) {
+	wallet := NewWallet()
+	bw := NewBlockChainWallet()
+
+	tr, err := RewardTransaction(wallet, bw)
+
+	if err != nil {
+		t.Error("Didnot expect an error here ", err)
+	}
+	var got int64
+	want := int64(20)
+	t.Run("reward the miner`s wallet", func(t *testing.T) {
+		for i := range tr.Outputs {
+			if tr.Outputs[i].Address == wallet.publicKey {
+				got = tr.Outputs[i].Amount
+				if want != got {
+					t.Errorf("Wanted %d but got %d", want, got)
+				}
+			}
+		}
+	})
+}
